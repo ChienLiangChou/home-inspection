@@ -2,7 +2,7 @@
 
 ## 📊 進度追蹤
 - ✅ **一 專案與環境** - 已完成 (Git: 86db3d5)
-- ✅ **二 後端 FastAPI** - 已完成 (Git: 待提交)
+- ✅ **二 後端 FastAPI** - 已完成 (Git: c00e9c7)
 - ⏳ **三 前端 React+Vite** - 待開始  
 - ⏳ **四 RAG 不變** - 待開始
 - ⏳ **五 測試與種子資料** - 待開始
@@ -45,7 +45,7 @@
 - ✅ 實現業務邏輯服務層
 - ✅ 創建 Realtime 上下文注入功能
 - ✅ 設置 Docker 容器化配置
-- 📝 Git Checkpoint: 待提交 - "Step 2 backend: complete FastAPI backend implementation"
+- 📝 Git Checkpoint: c00e9c7 - "Step 2 backend: complete FastAPI backend implementation"
 
 三 前端 React+Vite
 - Sensor 面板 顯示 GET /sensor/latest
