@@ -1,0 +1,16 @@
+{
+  "name": "home-inspection-backend",
+  "version": "1.0.0",
+  "description": "FastAPI backend for Home Inspection Sensor System",
+  "scripts": {
+    "dev": "uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+    "start": "uvicorn main:app --host 0.0.0.0 --port 8000",
+    "test": "pytest",
+    "lint": "flake8 . && black --check . && isort --check-only .",
+    "format": "black . && isort .",
+    "mypy": "mypy ."
+  },
+  "keywords": ["fastapi", "sensors", "home-inspection", "iot"],
+  "author": "Home Inspection Team",
+  "license": "MIT"
+}
