@@ -1,8 +1,23 @@
 請依下列規格擴充專案 感測器層不得硬編碼任何金鑰
 
-一 專案與環境
-- 維持 mono-repo 結構 apps/frontend apps/backend rag/ingest infra/docker
-- .env.sample 補上 DB_URL（Postgres 或 SQLite 用檔案路徑）
+## 📊 進度追蹤
+- ✅ **一 專案與環境** - 已完成 (Git: 86db3d5)
+- ⏳ **二 後端 FastAPI** - 待開始
+- ⏳ **三 前端 React+Vite** - 待開始  
+- ⏳ **四 RAG 不變** - 待開始
+- ⏳ **五 測試與種子資料** - 待開始
+- ⏳ **六 README** - 待開始
+
+---
+
+一 專案與環境 ✅ COMPLETED
+- ✅ 維持 mono-repo 結構 apps/frontend apps/backend rag/ingest infra/docker
+- ✅ .env.sample 補上 DB_URL（Postgres 或 SQLite 用檔案路徑）
+- ✅ 創建根目錄 package.json 用於 mono-repo 工作區管理
+- ✅ 設置 Docker Compose 配置 (infra/docker/)
+- ✅ 創建 .gitignore 排除敏感文件和依賴項
+- ✅ 添加 README.md 項目文檔
+- 📝 Git Checkpoint: 86db3d5 - "Step 1 env: complete project environment setup"
 
 二 後端 FastAPI
 - models
