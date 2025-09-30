@@ -5,8 +5,8 @@
 - ✅ **二 後端 FastAPI** - 已完成 (Git: c00e9c7)
 - ✅ **三 前端 React+Vite** - 已完成 (Git: d1441f3)  
 - ✅ **四 RAG 不變** - 已完成 (Git: e9d541f)
-- ✅ **五 測試與種子資料** - 已完成 (Git: 待提交)
-- ⏳ **六 README** - 待開始
+- ✅ **五 測試與種子資料** - 已完成 (Git: 63fd9c0)
+- ✅ **六 README** - 已完成 (Git: 待提交)
 
 ---
 
@@ -88,10 +88,18 @@
 - ✅ 綜合測試執行器 (run_tests.py)
 - ✅ WebSocket 即時串流測試
 - ✅ 感測器上下文整合測試
-- 📝 Git Checkpoint: 待提交 - "Step 5 testing: complete testing and seed data implementation"
+- 📝 Git Checkpoint: 63fd9c0 - "Step 5 testing: complete testing and seed data implementation"
 
-六 README
-- 如何用 curl 傳感測資料與查詢
-- 如何開啟 WebSocket 並在前端訂閱
-- 資料保存與刪除策略
-- 所有機密來自環境變數 不得進入程式碼
+六 README ✅ COMPLETED
+- ✅ 如何用 curl 傳感測資料與查詢
+- ✅ 如何開啟 WebSocket 並在前端訂閱
+- ✅ 資料保存與刪除策略
+- ✅ 所有機密來自環境變數 不得進入程式碼
+- ✅ 主要 README.md 完整專案文檔
+- ✅ API_DOCUMENTATION.md 詳細 API 參考
+- ✅ WEBSOCKET_GUIDE.md WebSocket 整合指南
+- ✅ DATA_MANAGEMENT.md 資料管理策略
+- ✅ 環境變數與安全最佳實踐
+- ✅ Docker 部署指南
+- ✅ 測試與故障排除指南
+- 📝 Git Checkpoint: 待提交 - "Step 6 readme: complete comprehensive documentation"
