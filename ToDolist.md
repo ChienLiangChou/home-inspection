@@ -4,8 +4,8 @@
 - ✅ **一 專案與環境** - 已完成 (Git: 86db3d5)
 - ✅ **二 後端 FastAPI** - 已完成 (Git: c00e9c7)
 - ✅ **三 前端 React+Vite** - 已完成 (Git: d1441f3)  
-- ✅ **四 RAG 不變** - 已完成 (Git: pending)
-- ⏳ **五 測試與種子資料** - 待開始
+- ✅ **四 RAG 不變** - 已完成 (Git: e9d541f)
+- ✅ **五 測試與種子資料** - 已完成 (Git: 待提交)
 - ⏳ **六 README** - 待開始
 
 ---
@@ -70,17 +70,25 @@
 - ✅ RAG 上下文格式化與 AI 整合
 - ✅ CLI 工具與健康檢查
 - ✅ 完整的文件處理管道與錯誤處理
-- 📝 Git Checkpoint: pending - "Step 4 rag: complete RAG system with sensor integration"
+- 📝 Git Checkpoint: e9d541f - "Step 4 rag: complete RAG system with sensor integration"
 
-五 測試與種子資料
-- 加入 seed 腳本 建三種裝置
+五 測試與種子資料 ✅ COMPLETED
+- ✅ 加入 seed 腳本 建三種裝置
   1 ble_moist_001 type moisture_meter
   2 ble_co2_003 type co2
   3 ble_ir_002 type thermal_spot
-- e2e 測試
+- ✅ e2e 測試
   - 連線後 模擬送三筆資料
   - 前端面板顯示即時讀數
   - 模型在 Roofing 或 Plumbing 場景會引用 sensor_data 給出行動建議
+- ✅ 種子資料腳本 (seed_data.py)
+- ✅ 端到端測試 (test_e2e.py)
+- ✅ RAG 整合測試 (test_rag_integration.py)
+- ✅ 測試資料生成器 (generate_test_data.py)
+- ✅ 綜合測試執行器 (run_tests.py)
+- ✅ WebSocket 即時串流測試
+- ✅ 感測器上下文整合測試
+- 📝 Git Checkpoint: 待提交 - "Step 5 testing: complete testing and seed data implementation"
 
 六 README
 - 如何用 curl 傳感測資料與查詢
