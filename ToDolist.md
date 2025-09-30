@@ -3,8 +3,8 @@
 ## 📊 進度追蹤
 - ✅ **一 專案與環境** - 已完成 (Git: 86db3d5)
 - ✅ **二 後端 FastAPI** - 已完成 (Git: c00e9c7)
-- ✅ **三 前端 React+Vite** - 已完成 (Git: pending)  
-- ⏳ **四 RAG 不變** - 待開始
+- ✅ **三 前端 React+Vite** - 已完成 (Git: d1441f3)  
+- ✅ **四 RAG 不變** - 已完成 (Git: pending)
 - ⏳ **五 測試與種子資料** - 待開始
 - ⏳ **六 README** - 待開始
 
@@ -57,11 +57,20 @@
 - ✅ 響應式設計與元件化架構
 - ✅ API 服務層與錯誤處理
 - ✅ 自動刷新與手動刷新功能
-- 📝 Git Checkpoint: pending - "Step 3 frontend: complete React+Vite frontend implementation"
+- 📝 Git Checkpoint: d1441f3 - "Step 3 frontend: complete React+Vite frontend implementation"
 
-四 RAG 不變
-- 維持 /rag/ingest 的 upsert 與 search
-- 在產生回答前 把後端 build_sensor_context 的結果併入會話
+四 RAG 不變 ✅ COMPLETED
+- ✅ 維持 /rag/ingest 的 upsert 與 search 功能
+- ✅ 在產生回答前把後端 build_sensor_context 的結果併入會話
+- ✅ Qdrant 向量資料庫整合與文件儲存
+- ✅ OpenAI 嵌入生成與語義搜尋
+- ✅ 多格式文件處理 (TXT, MD, JSON, PDF, DOCX)
+- ✅ 感測器資料整合與即時上下文生成
+- ✅ 分類搜尋與過濾功能
+- ✅ RAG 上下文格式化與 AI 整合
+- ✅ CLI 工具與健康檢查
+- ✅ 完整的文件處理管道與錯誤處理
+- 📝 Git Checkpoint: pending - "Step 4 rag: complete RAG system with sensor integration"
 
 五 測試與種子資料
 - 加入 seed 腳本 建三種裝置
