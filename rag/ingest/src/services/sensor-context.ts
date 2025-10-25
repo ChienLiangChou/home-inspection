@@ -88,16 +88,18 @@ export class SensorContextService {
       
       for (const [type, readings] of Object.entries(readingsByType)) {
         const latest = readings[0];
-        const avg = readings.reduce((sum, r) => sum + r.value, 0) / readings.length;
-        
-        parts.push(`\n**${type.replace('_', ' ').toUpperCase()}:**`);
-        parts.push(`- Latest: ${latest.value} ${latest.unit} (${latest.confidence * 100}% confidence)`);
-        parts.push(`- Average: ${avg.toFixed(2)} ${latest.unit}`);
-        parts.push(`- Location: ${latest.location}`);
-        parts.push(`- Age: ${Math.round(latest.age_seconds)}s ago`);
-        
-        if (latest.extras) {
-          parts.push(`- Additional Data: ${JSON.stringify(latest.extras)}`);
+        if (latest) {
+          const avg = readings.reduce((sum, r) => sum + r.value, 0) / readings.length;
+          
+          parts.push(`\n**${type.replace('_', ' ').toUpperCase()}:**`);
+          parts.push(`- Latest: ${latest.value} ${latest.unit} (${latest.confidence * 100}% confidence)`);
+          parts.push(`- Average: ${avg.toFixed(2)} ${latest.unit}`);
+          parts.push(`- Location: ${latest.location}`);
+          parts.push(`- Age: ${Math.round(latest.age_seconds)}s ago`);
+          
+          if (latest.extras) {
+            parts.push(`- Additional Data: ${JSON.stringify(latest.extras)}`);
+          }
         }
       }
 
@@ -125,12 +127,17 @@ export class SensorContextService {
       if (!grouped[reading.type]) {
         grouped[reading.type] = [];
       }
-      grouped[reading.type].push(reading);
+      const typeArray = grouped[reading.type];
+      if (typeArray) {
+        typeArray.push(reading);
+      }
     }
 
     // Sort each group by timestamp (most recent first)
     for (const type in grouped) {
-      grouped[type].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      if (grouped[type]) {
+        grouped[type].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      }
     }
 
     return grouped;
@@ -192,3 +199,7 @@ export class SensorContextService {
     }
   }
 }
+
+
+
+

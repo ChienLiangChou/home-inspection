@@ -53,7 +53,9 @@ export class RAGService {
         
         // Assign embeddings back to documents
         documentsNeedingEmbeddings.forEach((doc, index) => {
-          doc.embedding = embeddings[index];
+          if (embeddings[index]) {
+            doc.embedding = embeddings[index];
+          }
         });
       }
 
@@ -110,8 +112,8 @@ export class RAGService {
       // Search for relevant documents
       const searchQuery: SearchQuery = {
         query,
-        component,
-        location: locationPrefix,
+        component: component || undefined,
+        location: locationPrefix || undefined,
         limit: 10,
         threshold: 0.6,
         include_metadata: true,
@@ -135,7 +137,20 @@ export class RAGService {
       const ragContext: RAGContext = {
         query,
         search_results: searchResults,
-        sensor_context: sensorContext,
+        sensor_context: sensorContext || {
+          component: component || '',
+          location_prefix: locationPrefix || '',
+          window_seconds: windowSec,
+          readings: [],
+          summary: {
+            component: component || '',
+            location_prefix: locationPrefix || '',
+            total_readings: 0,
+            readings_by_type: {},
+            overall_stats: {},
+            timestamp: new Date().toISOString(),
+          },
+        },
         combined_context: combinedContext,
         timestamp: new Date().toISOString(),
       };
@@ -198,18 +213,20 @@ export class RAGService {
       
       for (let i = 0; i < searchResults.length; i++) {
         const result = searchResults[i];
-        parts.push(`\n### ${i + 1}. ${result.title} (Relevance: ${result.relevance})`);
-        parts.push(`Category: ${result.metadata.category}`);
-        
-        if (result.metadata.location) {
-          parts.push(`Location: ${result.metadata.location}`);
+        if (result) {
+          parts.push(`\n### ${i + 1}. ${result.title} (Relevance: ${result.relevance})`);
+          parts.push(`Category: ${result.metadata.category}`);
+          
+          if (result.metadata.location) {
+            parts.push(`Location: ${result.metadata.location}`);
+          }
+          
+          if (result.metadata.component) {
+            parts.push(`Component: ${result.metadata.component}`);
+          }
+          
+          parts.push(`\nContent:\n${result.content}`);
         }
-        
-        if (result.metadata.component) {
-          parts.push(`Component: ${result.metadata.component}`);
-        }
-        
-        parts.push(`\nContent:\n${result.content}`);
       }
     } else {
       parts.push('\n## Documentation: No relevant documents found.');
@@ -273,3 +290,7 @@ export class RAGService {
     return await this.qdrantService.getCollectionInfo();
   }
 }
+
+
+
+

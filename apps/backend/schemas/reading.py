@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional, Dict, Any, List
 from datetime import datetime
+from .sensor import SensorData
 
 
 class ReadingData(BaseModel):

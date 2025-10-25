@@ -6,7 +6,7 @@
 - ✅ **三 前端 React+Vite** - 已完成 (Git: d1441f3)  
 - ✅ **四 RAG 不變** - 已完成 (Git: e9d541f)
 - ✅ **五 測試與種子資料** - 已完成 (Git: 63fd9c0)
-- ✅ **六 README** - 已完成 (Git: 待提交)
+- ✅ **六 README** - 已完成 (Git: d69d590)
 
 ---
 
@@ -102,4 +102,4 @@
 - ✅ 環境變數與安全最佳實踐
 - ✅ Docker 部署指南
 - ✅ 測試與故障排除指南
-- 📝 Git Checkpoint: 待提交 - "Step 6 readme: complete comprehensive documentation"
+- 📝 Git Checkpoint: d69d590 - "Step 6 readme: complete comprehensive documentation"

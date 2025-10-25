@@ -9,6 +9,7 @@ from database.connection import engine
 from database.base import Base
 from api.sensor_routes import router as sensor_router
 from api.websocket_routes import router as websocket_router
+from api.rag_routes import router as rag_router
 
 
 @asynccontextmanager
@@ -42,7 +43,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000").split(","),
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8000,http://10.0.0.68:3000,http://10.0.0.68:3001,http://10.0.0.68:3002").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,6 +52,7 @@ app.add_middleware(
 # Include routers
 app.include_router(sensor_router, prefix="/api")
 app.include_router(websocket_router, prefix="/api")
+app.include_router(rag_router)
 
 
 @app.get("/")

@@ -17,7 +17,11 @@ export class EmbeddingService {
         input: this.prepareText(text),
       });
 
-      return response.data[0].embedding;
+      const embedding = response.data[0]?.embedding;
+      if (!embedding) {
+        throw new Error('No embedding returned from OpenAI API');
+      }
+      return embedding;
     } catch (error) {
       console.error('❌ Failed to generate embedding:', error);
       throw error;
@@ -96,3 +100,7 @@ export class EmbeddingService {
     };
   }
 }
+
+
+
+

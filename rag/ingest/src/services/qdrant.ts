@@ -1,4 +1,4 @@
-import { QdrantClient } from 'qdrant-client';
+import { QdrantClient } from '@qdrant/js-client-rest';
 import { CollectionConfig, Document, UpsertRequest, UpsertResponse } from '../types/index.js';
 
 export class QdrantService {
@@ -10,10 +10,11 @@ export class QdrantService {
     apiKey: string | undefined,
     collectionName: string
   ) {
-    this.client = new QdrantClient({
-      url,
-      apiKey,
-    });
+    const clientConfig: any = { url };
+    if (apiKey) {
+      clientConfig.apiKey = apiKey;
+    }
+    this.client = new QdrantClient(clientConfig);
     this.collectionName = collectionName;
   }
 
@@ -37,10 +38,11 @@ export class QdrantService {
   }
 
   private async createCollection(): Promise<void> {
-    const config: CollectionConfig = {
-      name: this.collectionName,
-      vector_size: 1536, // OpenAI ada-002 embedding dimension
-      distance: 'Cosine',
+    const config = {
+      vectors: {
+        size: 1536, // OpenAI ada-002 embedding dimension
+        distance: 'Cosine' as const,
+      },
       on_disk_payload: true,
       hnsw_config: {
         m: 16,
@@ -50,7 +52,7 @@ export class QdrantService {
     };
 
     try {
-      await this.client.createCollection(config);
+      await this.client.createCollection(this.collectionName, config);
       console.log(`✅ Created collection '${this.collectionName}'`);
     } catch (error) {
       console.error(`❌ Failed to create collection '${this.collectionName}':`, error);
@@ -175,7 +177,7 @@ export class QdrantService {
     try {
       const info = await this.client.getCollection(this.collectionName);
       return {
-        name: info.collection_name,
+        name: this.collectionName,
         status: info.status,
         vectors_count: info.vectors_count,
         points_count: info.points_count,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SensorAPI } from '../services/api';
-import { SensorData, SensorType, SensorLocation } from '../types/sensor';
+import { SensorData, SensorType } from '../types/sensor';
 import { 
   Play, 
   RotateCcw, 
@@ -87,7 +87,7 @@ export const MockDataPanel: React.FC = () => {
   const generateRandomData = (): SensorData[] => {
     return mockSensors.map(sensor => ({
       ...sensor,
-      value: generateRandomValue(sensor.type),
+      value: generateRandomValue(sensor.type as SensorType),
       confidence: Math.random() * 0.3 + 0.7, // 0.7 to 1.0
       timestamp: new Date().toISOString(),
       extras_json: {

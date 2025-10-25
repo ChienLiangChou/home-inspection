@@ -12,14 +12,14 @@ export interface DocumentMetadata {
   source: string;
   category: DocumentCategory;
   tags: string[];
-  location?: string;
-  component?: string;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-  confidence?: number;
+  location?: string | undefined;
+  component?: string | undefined;
+  severity?: 'low' | 'medium' | 'high' | 'critical' | undefined;
+  confidence?: number | undefined;
   language: string;
-  page_count?: number;
-  file_type?: string;
-  file_size?: number;
+  page_count?: number | undefined;
+  file_type?: string | undefined;
+  file_size?: number | undefined;
 }
 
 export type DocumentCategory = 
@@ -38,12 +38,12 @@ export type DocumentCategory =
 
 export interface SearchQuery {
   query: string;
-  category?: DocumentCategory;
-  location?: string;
-  component?: string;
-  limit?: number;
-  threshold?: number;
-  include_metadata?: boolean;
+  category?: DocumentCategory | undefined;
+  location?: string | undefined;
+  component?: string | undefined;
+  limit?: number | undefined;
+  threshold?: number | undefined;
+  include_metadata?: boolean | undefined;
 }
 
 export interface SearchResult {
@@ -131,3 +131,7 @@ export interface EmbeddingConfig {
   batch_size: number;
   max_retries: number;
 }
+
+
+
+

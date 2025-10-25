@@ -52,7 +52,7 @@ export class WebSocketService {
 
   connect(): void {
     try {
-      const wsUrl = `ws://localhost:8000/sensor/stream`;
+      const wsUrl = `ws://localhost:8000/api/ws/sensor/stream`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {

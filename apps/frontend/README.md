@@ -145,3 +145,11 @@ The frontend is designed to work seamlessly with the FastAPI backend:
 - Add sensor configuration management
 - Integrate with Realtime AI interface
 
+
+
+
+
+
+
+
+

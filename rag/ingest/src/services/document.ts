@@ -24,8 +24,8 @@ export class DocumentService {
         source: filePath,
         category,
         tags: this.extractTags(content, category),
-        location: metadata.location,
-        component: metadata.component,
+        location: metadata.location || undefined,
+        component: metadata.component || undefined,
         severity: metadata.severity || 'medium',
         confidence: 1.0,
         language: 'en',
@@ -143,7 +143,7 @@ export class DocumentService {
   }
 
   private extractTags(content: string, category: DocumentCategory): string[] {
-    const tags = [category];
+    const tags: string[] = [category];
     const lowerContent = content.toLowerCase();
 
     // Extract location-based tags
@@ -220,3 +220,7 @@ export class DocumentService {
     };
   }
 }
+
+
+
+

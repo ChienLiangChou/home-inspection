@@ -198,3 +198,11 @@ async function performRAGContextSearch(ragService: RAGService, query: string) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
+
+
+
+
+
+
+
+
