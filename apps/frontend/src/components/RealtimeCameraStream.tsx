@@ -265,49 +265,62 @@ const RealtimeCameraStream: React.FC<RealtimeCameraStreamProps> = ({
   const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
   const hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
-  // 如果是 iPhone Safari 且不支援攝像頭，顯示特殊訊息
-  if (isIOSSafari && !hasGetUserMedia) {
-    return (
-      <div style={{ 
-        backgroundColor: 'white', 
-        borderRadius: '8px', 
-        padding: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '20px',
-        textAlign: 'center'
-      }}>
-        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📹</div>
-        <h3 style={{ marginBottom: '15px', color: '#333' }}>iPhone Safari 實時攝像頭限制</h3>
-        <div style={{
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px'
-        }}>
-          <p style={{ color: '#856404', margin: 0 }}>
-            <strong>iPhone Safari 不支援實時攝像頭 API</strong><br/>
-            請使用 "📱 iPhone" 標籤進行房屋檢查
-          </p>
-        </div>
-        <div style={{
-          backgroundColor: '#d1ecf1',
-          border: '1px solid #bee5eb',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px'
-        }}>
-          <h4 style={{ color: '#0c5460', margin: '0 0 10px 0' }}>💡 建議解決方案：</h4>
-          <ol style={{ color: '#0c5460', textAlign: 'left', paddingLeft: '20px' }}>
-            <li>點擊 "📱 iPhone" 標籤</li>
-            <li>使用 iPhone 原生相機拍照</li>
-            <li>上傳照片進行 AI 分析</li>
-            <li>獲得專業檢查報告</li>
-          </ol>
-        </div>
-      </div>
-    );
-  }
+      // 如果是 iPhone Safari 且不支援攝像頭，顯示特殊訊息
+      if (isIOSSafari && !hasGetUserMedia) {
+        return (
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '8px', 
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>📹</div>
+            <h3 style={{ marginBottom: '15px', color: '#333' }}>iPhone Safari 實時攝像頭限制</h3>
+            <div style={{
+              backgroundColor: '#fff3cd',
+              border: '1px solid #ffc107',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px'
+            }}>
+              <p style={{ color: '#856404', margin: 0 }}>
+                <strong>iPhone Safari 不支援實時攝像頭 API</strong><br/>
+                但我們提供了完整的替代解決方案！
+              </p>
+            </div>
+            <div style={{
+              backgroundColor: '#d1ecf1',
+              border: '1px solid #bee5eb',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px'
+            }}>
+              <h4 style={{ color: '#0c5460', margin: '0 0 10px 0' }}>✅ iPhone 解決方案優勢：</h4>
+              <ul style={{ color: '#0c5460', textAlign: 'left', paddingLeft: '20px' }}>
+                <li>使用 iPhone 原生相機，畫質更佳</li>
+                <li>支援多張照片同時上傳</li>
+                <li>AI 智能分析，專業準確</li>
+                <li>生成詳細檢查報告</li>
+                <li>無需額外硬體設備</li>
+              </ul>
+            </div>
+            <div style={{
+              backgroundColor: '#d4edda',
+              border: '1px solid #c3e6cb',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px'
+            }}>
+              <h4 style={{ color: '#155724', margin: '0 0 10px 0' }}>🚀 立即開始：</h4>
+              <p style={{ color: '#155724', margin: 0 }}>
+                點擊 "📱 iPhone" 標籤開始使用完整的 iPhone 房屋檢查工作流程
+              </p>
+            </div>
+          </div>
+        );
+      }
 
   return (
     <BrowserCompatibilityCheck>

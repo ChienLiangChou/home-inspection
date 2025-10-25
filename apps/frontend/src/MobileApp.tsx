@@ -5,7 +5,7 @@ import RealtimeCameraStream from './components/RealtimeCameraStream';
 import DirectCameraAccess from './components/DirectCameraAccess';
 import SimpleCameraTest from './components/SimpleCameraTest';
 import UniversalCameraAccess from './components/UniversalCameraAccess';
-import SimpleiPhoneWorkflow from './components/SimpleiPhoneWorkflow';
+import iPhoneCameraSolution from './components/iPhoneCameraSolution';
 
 interface SensorReading {
   id: number;
@@ -404,7 +404,7 @@ export default function MobileApp() {
 
         {activeTab === 'iphone-workflow' && (
           <div>
-            <SimpleiPhoneWorkflow />
+            <iPhoneCameraSolution />
           </div>
         )}
       </div>
