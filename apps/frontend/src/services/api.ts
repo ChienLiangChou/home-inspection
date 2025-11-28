@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { ReadingFilter, SensorReadingResponse } from '../types/sensor';
 
-const API_BASE_URL = '/api';
+// Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
