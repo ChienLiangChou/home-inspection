@@ -27,16 +27,20 @@ const BrowserCompatibilityCheck: React.FC<BrowserCompatibilityCheckProps> = ({ c
     let message = '';
     let compatible = true;
     
-    // 修復：iPhone Safari 不支援攝像頭 API，但不阻止訪問其他功能
-    if (!hasGetUserMedia && isIOS) {
-      message = 'iPhone Safari 不支援攝像頭 API，但您可以使用 "📱 iPhone" 標籤進行房屋檢查。';
+    // iOS 安全限制：需要 secure context (HTTPS 或 localhost)
+    const isSecureContext = window.isSecureContext;
+    if (isIOS && !isSecureContext) {
+      message = 'iOS 安全限制：相機功能需要 HTTPS 或 localhost。您可以使用 "📱 iPhone" 標籤進行拍照上傳（不受此限制）。';
+      compatible = true; // 允許訪問其他功能
+    } else if (!hasGetUserMedia && isIOS) {
+      message = 'iOS 上相機功能需要 HTTPS 或 localhost。您可以使用 "📱 iPhone" 標籤進行房屋檢查。';
       compatible = true; // 改為 true，允許訪問其他功能
     } else if (!hasGetUserMedia) {
       message = '您的瀏覽器不支援攝像頭訪問。';
       compatible = false;
-    } else if (isIOS && !isSafari) {
-      // 不再阻止，只顯示建議訊息
-      message = '在 iPhone 上，建議使用 Safari 瀏覽器以獲得最佳體驗，但您可以嘗試使用當前瀏覽器。';
+    } else if (isIOS) {
+      // iOS 上所有瀏覽器都使用 WebKit，限制相同
+      message = '在 iPhone 上，相機功能需要 HTTPS 或 localhost 環境。';
       compatible = true; // 改為 true，允許嘗試
     } else if (isAndroid && !isChrome) {
       message = '在 Android 上，建議使用 Chrome 瀏覽器。';
@@ -78,7 +82,7 @@ const BrowserCompatibilityCheck: React.FC<BrowserCompatibilityCheckProps> = ({ c
         }}>
           <h4 style={{ marginBottom: '10px' }}>建議的瀏覽器：</h4>
           <ul style={{ textAlign: 'left', margin: 0, paddingLeft: '20px' }}>
-            <li><strong>iPhone:</strong> Safari 瀏覽器</li>
+            <li><strong>iPhone:</strong> 需要 HTTPS 或 localhost（所有瀏覽器限制相同）</li>
             <li><strong>Android:</strong> Chrome 瀏覽器</li>
             <li><strong>桌面:</strong> Chrome、Safari 或 Edge</li>
           </ul>

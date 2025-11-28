@@ -1,15 +1,30 @@
 import os
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file first
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import uvicorn
 
-from database.connection import engine
-from database.base import Base
+from api.issue_routes import router as issue_router
+from api.rag_routes import router as rag_router
+from api.report_routes import router as report_router
 from api.sensor_routes import router as sensor_router
 from api.websocket_routes import router as websocket_router
-from api.rag_routes import router as rag_router
+from api.storage_routes import router as storage_router
+from api.feedback_routes import router as feedback_router
+from api.cleaning_routes import router as cleaning_router
+from api.training_routes import router as training_router
+from api.performance_routes import router as performance_router
+from database.base import Base
+from database.connection import engine
 
 
 @asynccontextmanager
@@ -43,7 +58,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8000,http://10.0.0.68:3000,http://10.0.0.68:3001,http://10.0.0.68:3002").split(","),
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8000,https://localhost:3000,https://10.0.0.33:3000,http://10.0.0.33:3000,http://10.0.0.33:3001,http://10.0.0.33:3002,https://10.0.0.33:3001,https://10.0.0.33:3002,http://10.0.0.68:3000,http://10.0.0.68:3001,http://10.0.0.68:3002").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,6 +68,13 @@ app.add_middleware(
 app.include_router(sensor_router, prefix="/api")
 app.include_router(websocket_router, prefix="/api")
 app.include_router(rag_router)
+app.include_router(issue_router)
+app.include_router(report_router)
+app.include_router(storage_router)
+app.include_router(feedback_router)
+app.include_router(cleaning_router)
+app.include_router(training_router)
+app.include_router(performance_router)
 
 
 @app.get("/")
@@ -117,8 +139,9 @@ async def general_exception_handler(request, exc):
 
 if __name__ == "__main__":
     # Get configuration from environment
+    # Railway uses PORT, but we also support BACKEND_PORT for local development
     host = os.getenv("BACKEND_HOST", "0.0.0.0")
-    port = int(os.getenv("BACKEND_PORT", "8000"))
+    port = int(os.getenv("PORT", os.getenv("BACKEND_PORT", "8000")))
     debug = os.getenv("DEBUG", "false").lower() == "true"
     
     print(f"🌐 Starting server on {host}:{port}")

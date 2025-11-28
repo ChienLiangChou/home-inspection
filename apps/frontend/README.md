@@ -128,6 +128,40 @@ The build output will be in the `dist/` directory, ready for deployment.
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run test` - Run tests (when implemented)
 
+## iOS Camera Streaming Requirements
+
+### Secure Context Requirement
+
+iOS (iPhone/iPad) requires camera access (`getUserMedia`) to be used only in **secure contexts**:
+
+✅ **Supported:**
+- HTTPS websites (`https://your-domain.com`)
+- localhost (`http://localhost:3000`)
+
+❌ **Not Supported:**
+- Development IP addresses (`http://192.168.x.x:3000`)
+- Other non-HTTPS IP addresses (`http://10.x.x.x:3000`)
+
+### Important Notes
+
+1. **All iOS browsers use WebKit**: Safari, Chrome, and Edge on iOS all use the same WebKit engine with identical security restrictions. Switching browsers won't bypass the secure context requirement.
+
+2. **Error Messages**: The application now properly detects and explains secure context issues with clear error messages.
+
+3. **Alternative Solution**: The "📱 iPhone" tab provides a photo upload workflow that works regardless of secure context, using the native iPhone camera app.
+
+### Development Workarounds
+
+- **Use HTTPS with IP address** (Recommended for iPhone testing):
+  1. Generate self-signed certificate: `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes`
+  2. Set `VITE_HTTPS=true` environment variable
+  3. Access via `https://192.168.x.x:3000` on iPhone
+  4. Accept the security warning (self-signed certificate)
+  See `HTTPS_SETUP.md` for detailed instructions.
+
+- **Use localhost**: Access the app via `http://localhost:3000` on your computer (not iPhone)
+- **Use Photo Upload**: Use the iPhone photo upload feature which doesn't require secure context
+
 ## Integration with Backend
 
 The frontend is designed to work seamlessly with the FastAPI backend:
@@ -144,6 +178,10 @@ The frontend is designed to work seamlessly with the FastAPI backend:
 - Implement data visualization charts
 - Add sensor configuration management
 - Integrate with Realtime AI interface
+
+
+
+
 
 
 

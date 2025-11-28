@@ -44,3 +44,11 @@ mypy==1.7.1
 
 # Development tools
 watchfiles==0.21.0
+
+# Self-learning system dependencies
+scikit-learn>=1.3.0  # Machine learning models (severity prediction)
+Pillow>=10.0.0       # Image processing
+imagehash>=4.3.1     # Image similarity detection (deduplication)
+pandas>=2.0.0        # Data processing
+numpy>=1.24.0        # Numerical computation
+schedule>=1.2.0      # Task scheduling for automated cleaning

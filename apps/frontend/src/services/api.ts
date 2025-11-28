@@ -11,9 +11,46 @@ const apiClient = axios.create({
 });
 
 export class SensorAPI {
-  static async sendSensorData(data: SensorData | SensorData[]): Promise<void> {
+  /**
+   * Send sensor data to the backend.
+   * The backend expects a SensorDataBatch with separate sensors and readings arrays.
+   * This method accepts either:
+   * - A single SensorData object (will be split into sensor and reading)
+   * - An array of SensorData objects
+   * - A properly formatted SensorDataBatch object
+   */
+  static async sendSensorData(data: any): Promise<void> {
     try {
-      await apiClient.post('/sensor/data', data);
+      // If data already has sensors and readings arrays, use it directly
+      if (data.sensors && data.readings) {
+        await apiClient.post('/sensor/data', data);
+        return;
+      }
+
+      // Otherwise, convert SensorData format to SensorDataBatch format
+      const dataArray = Array.isArray(data) ? data : [data];
+      
+      const batch = {
+        sensors: dataArray.map((item: any) => ({
+          sensor_id: item.sensor_id,
+          vendor: item.vendor || 'Unknown',
+          model: item.model || 'Unknown',
+          type: item.type
+        })),
+        readings: dataArray.map((item: any) => ({
+          sensor_id: item.sensor_id,
+          type: item.type,
+          location: item.location,
+          value: item.value,
+          unit: item.unit,
+          confidence: item.confidence,
+          calibration_json: item.calibration_json,
+          extras_json: item.extras_json,
+          timestamp: item.timestamp || new Date().toISOString()
+        }))
+      };
+
+      await apiClient.post('/sensor/data', batch);
     } catch (error) {
       console.error('Failed to send sensor data:', error);
       throw error;
@@ -52,7 +89,24 @@ export class WebSocketService {
 
   connect(): void {
     try {
-      const wsUrl = `ws://localhost:8000/api/ws/sensor/stream`;
+      // Use Vite proxy for WebSocket in development, or direct connection in production
+      // Vite proxy handles /api/* routes, so we use ws://localhost:3000/api/ws/sensor/stream
+      // which gets proxied to the backend
+      const isDev = import.meta.env.DEV;
+      let wsUrl: string;
+      
+      if (isDev) {
+        // In development, use the Vite dev server (which proxies to backend)
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsUrl = `${protocol}//${window.location.host}/api/ws/sensor/stream`;
+      } else {
+        // In production, connect directly to backend
+        const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const wsProtocol = backendUrl.startsWith('https') ? 'wss:' : 'ws:';
+        const wsHost = backendUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        wsUrl = `${wsProtocol}//${wsHost}/api/ws/sensor/stream`;
+      }
+      
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {

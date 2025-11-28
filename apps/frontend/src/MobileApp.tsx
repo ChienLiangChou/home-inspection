@@ -6,23 +6,27 @@ import DirectCameraAccess from './components/DirectCameraAccess';
 import SimpleCameraTest from './components/SimpleCameraTest';
 import UniversalCameraAccess from './components/UniversalCameraAccess';
 import iPhoneCameraSolution from './components/iPhoneCameraSolution';
+import iPhoneRealtimeStream from './components/iPhoneRealtimeStream';
 
 interface SensorReading {
   id: number;
-  sensor_id: number;
+  sensor_id: number | string; // Backend returns number (DB ID), but we can handle both
   type: string;
   location: string;
   value: number;
   unit: string;
   confidence: number;
   timestamp: string;
+  created_at?: string;
+  calibration_json?: Record<string, any>;
+  extras_json?: Record<string, any>;
 }
 
 export default function MobileApp() {
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'testing' | 'camera' | 'realtime-stream' | 'bluetooth' | 'realtime' | 'direct-camera' | 'simple-test' | 'universal-camera' | 'iphone-workflow'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'testing' | 'camera' | 'realtime-stream' | 'bluetooth' | 'realtime' | 'direct-camera' | 'simple-test' | 'universal-camera' | 'iphone-workflow' | 'iphone-realtime'>('dashboard');
 
   // Fetch sensor data
   const fetchSensorData = async () => {
@@ -34,8 +38,15 @@ export default function MobileApp() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setReadings(data);
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setReadings(data);
+      } else {
+        console.error('Expected array but got:', typeof data, data);
+        setReadings([]);
+      }
     } catch (err) {
+      console.error('Error fetching sensor data:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch sensor data');
     } finally {
       setIsLoading(false);
@@ -46,6 +57,18 @@ export default function MobileApp() {
   useEffect(() => {
     fetchSensorData();
   }, []);
+
+  // Listen for tab switch events
+  useEffect(() => {
+    const handleTabSwitch = (event: CustomEvent) => {
+      setActiveTab(event.detail as any);
+    };
+    window.addEventListener('switchTab', handleTabSwitch as EventListener);
+    return () => {
+      window.removeEventListener('switchTab', handleTabSwitch as EventListener);
+    };
+  }, []);
+
 
   // Send test data
   const sendTestData = async () => {
@@ -126,7 +149,8 @@ export default function MobileApp() {
           { id: 'direct-camera', label: '🎥 Direct' },
           { id: 'simple-test', label: '🔧 Test' },
           { id: 'universal-camera', label: '🌐 Universal' },
-          { id: 'iphone-workflow', label: '📱 iPhone' }
+          { id: 'iphone-workflow', label: '📱 iPhone' },
+          { id: 'iphone-realtime', label: '📹 實時檢測' }
         ].map(tab => (
           <button
             key={tab.id}
@@ -405,6 +429,17 @@ export default function MobileApp() {
         {activeTab === 'iphone-workflow' && (
           <div>
             <iPhoneCameraSolution />
+          </div>
+        )}
+
+        {activeTab === 'iphone-realtime' && (
+          <div>
+            <iPhoneRealtimeStream 
+              onIssueDetected={(issue) => {
+                console.log('Issue detected:', issue);
+                // You can add additional handling here, like saving to backend
+              }}
+            />
           </div>
         )}
       </div>

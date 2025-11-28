@@ -72,6 +72,7 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:8000
 
 # OpenAI (for RAG integration)
 OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_VISION_MODEL=gpt-4o-mini  # Vision model for image analysis (gpt-4o-mini for cost optimization, gpt-4o for higher accuracy)
 REALTIME_MODEL=gpt-4
 
 # Qdrant (for RAG system)
@@ -131,6 +132,18 @@ npm run dev
 cd rag/ingest
 npm install
 npm run ingest  # Create knowledge base
+```
+
+**Device Simulator (Optional):**
+```bash
+cd apps/device_simulator
+pip install -r requirements.txt
+
+# Send one batch of sensor readings
+python device_simulator.py
+
+# Run continuously (sends readings every 5 seconds)
+python device_simulator.py --continuous
 ```
 
 ### 4. Access the System
@@ -275,6 +288,62 @@ Tests generate comprehensive reports:
 - `comprehensive_test_results.json` - Overall test results
 - `e2e_test_results.json` - End-to-end test details
 - `rag_integration_test_results.json` - RAG system test results
+
+## 📱 Home Inspection Device
+
+The system includes a device simulator that can send sensor readings to the backend, simulating real BLE sensors.
+
+### Real-time Live Streaming Detection
+
+The system supports **real-time live streaming** with AI-powered issue detection:
+
+- **Real-time Analysis**: Camera stream is analyzed every 2 seconds
+- **Instant Notifications**: Issues are detected and notified immediately
+- **Automatic Recording**: Detected issues are saved to database with snapshots
+- **Solution Recommendations**: Each issue includes recommended solutions
+
+**Important for iPhone Users:**
+- iPhone Safari does NOT support live streaming (getUserMedia API limitation)
+- **Solution**: Use iPhone Chrome or Edge browser for live streaming
+- **Alternative**: Use "📱 iPhone" tab for photo upload and analysis workflow
+
+### Device Simulator
+
+The device simulator (`apps/device_simulator/device_simulator.py`) simulates three sensor types:
+
+- **ble_moist_001** - Moisture meter (30-90% readings)
+- **ble_co2_003** - CO2 sensor (400-1200 ppm readings)
+- **ble_ir_002** - Thermal spot sensor (15-35°C readings)
+
+### Quick Start
+
+```bash
+cd apps/device_simulator
+pip install -r requirements.txt
+
+# Send one batch of readings
+python device_simulator.py
+
+# Run continuously (every 5 seconds)
+python device_simulator.py --continuous
+
+# Custom interval (every 10 seconds)
+python device_simulator.py --continuous --interval 10
+
+# Custom backend URL
+python device_simulator.py --backend http://localhost:8000
+```
+
+### Integration with Real BLE Devices
+
+To integrate real BLE sensors:
+
+1. Install BLE library: `pip install bleak` (Linux/Windows) or use `pyobjc` (macOS)
+2. Modify `device_simulator.py` to connect to actual BLE devices
+3. Map BLE characteristic values to the reading format
+4. Keep the same JSON structure for backend compatibility
+
+See `apps/device_simulator/README.md` for detailed documentation.
 
 ## 🤖 RAG System Usage
 
@@ -447,12 +516,14 @@ Home Inspection/
 │   │   ├── services/    # Business logic
 │   │   ├── schemas/     # Pydantic schemas
 │   │   └── utils/       # Utilities
-│   └── frontend/        # React frontend
-│       ├── src/
-│       │   ├── components/
-│       │   ├── services/
-│       │   └── types/
-│       └── public/
+│   ├── frontend/        # React frontend
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── services/
+│   │   │   └── types/
+│   │   └── public/
+│   └── device_simulator/ # Device simulator (Python)
+│       └── device_simulator.py
 ├── rag/ingest/          # RAG system
 │   ├── src/
 │   │   ├── services/
@@ -483,6 +554,11 @@ cd rag/ingest
 npm run ingest                   # Ingest documents
 npm run search "query"           # Test search
 npm run build                    # Build TypeScript
+
+# Device Simulator
+cd apps/device_simulator
+python device_simulator.py        # Send one batch
+python device_simulator.py --continuous  # Run continuously
 ```
 
 ## 🤝 Contributing

@@ -25,6 +25,30 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
     try {
       setError(null);
       
+      // Check secure context first (iOS requires HTTPS or localhost)
+      const isSecureContext = window.isSecureContext;
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      // iOS requires secure context (HTTPS or localhost)
+      if (isIOS && !isSecureContext) {
+        const errorMsg = '❌ iOS 安全限制：無法在非安全來源使用相機\n\n' +
+          'iOS 要求相機功能只能在以下環境使用：\n' +
+          '1. ✅ HTTPS 網站 (https://...)\n' +
+          '2. ✅ localhost (http://localhost:3000)\n' +
+          '\n' +
+          '❌ 不支援：\n' +
+          '• http://192.168.x.x:3000 (開發網址)\n' +
+          '• http://10.x.x.x:3000\n' +
+          '• 其他非 HTTPS 的 IP 位址\n' +
+          '\n' +
+          '💡 解決方案：\n' +
+          '1. 使用 HTTPS 部署（推薦）\n' +
+          '2. 使用 localhost 開發（http://localhost:3000）\n' +
+          '3. 或使用「📱 iPhone」標籤進行拍照分析';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+      
       // Check for modern API first, then fallback to old API
       const hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
       const hasOldGetUserMedia = !!((navigator as any).getUserMedia || (navigator as any).webkitGetUserMedia || (navigator as any).mozGetUserMedia);
@@ -33,14 +57,10 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
         throw new Error('您的瀏覽器不支援攝像頭訪問。請使用支援的瀏覽器。');
       }
       
-      // 修復：在 iPhone Chrome 上使用更寬鬆的約束條件
-      const userAgent = navigator.userAgent;
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-      const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
-      
+      // For iOS, use simpler constraints (all iOS browsers use WebKit with same restrictions)
       let constraints;
-      if (isIOS && isChrome) {
-        // iPhone Chrome 使用更簡單的約束條件
+      if (isIOS) {
+        // iOS browsers need simpler constraints
         constraints = {
           video: {
             facingMode: facingMode
@@ -48,7 +68,7 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
           audio: false
         };
       } else {
-        // 其他瀏覽器使用完整約束條件
+        // Other browsers use full constraints
         constraints = {
           video: {
             facingMode: facingMode,
@@ -88,13 +108,31 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
       let errorMessage = `無法訪問攝像頭: ${err.message}`;
       
       if (err.name === 'NotAllowedError') {
-        errorMessage = '攝像頭權限被拒絕。請在瀏覽器設置中允許攝像頭權限，或嘗試使用 Safari 瀏覽器。';
+        errorMessage = '攝像頭權限被拒絕。請在瀏覽器設置中允許攝像頭權限。';
       } else if (err.name === 'NotFoundError') {
         errorMessage = '未找到攝像頭設備。請檢查設備是否有攝像頭。';
-      } else if (err.name === 'NotSupportedError') {
-        errorMessage = '瀏覽器不支援攝像頭功能。請使用 Safari 瀏覽器。';
+      } else if (err.name === 'NotSupportedError' || err.name === 'SecurityError') {
+        // Check if it's a secure context issue
+        if (!window.isSecureContext) {
+          errorMessage = '❌ iOS 安全限制：無法在非安全來源使用相機\n\n' +
+            'iOS 要求相機功能只能在以下環境使用：\n' +
+            '1. ✅ HTTPS 網站 (https://...)\n' +
+            '2. ✅ localhost (http://localhost:3000)\n' +
+            '\n' +
+            '❌ 不支援：\n' +
+            '• http://192.168.x.x:3000 (開發網址)\n' +
+            '• http://10.x.x.x:3000\n' +
+            '• 其他非 HTTPS 的 IP 位址\n' +
+            '\n' +
+            '💡 解決方案：\n' +
+            '1. 使用 HTTPS 部署（推薦）\n' +
+            '2. 使用 localhost 開發（http://localhost:3000）\n' +
+            '3. 或使用「📱 iPhone」標籤進行拍照分析';
+        } else {
+          errorMessage = '瀏覽器不支援攝像頭功能。請確保使用支援的瀏覽器並訪問 HTTPS 或 localhost。';
+        }
       } else if (err.name === 'OverconstrainedError') {
-        errorMessage = '攝像頭設置不支援。請嘗試使用前置攝像頭或使用 Safari 瀏覽器。';
+        errorMessage = '攝像頭設置不支援。請嘗試使用前置攝像頭。';
       }
       
       setError(errorMessage);
@@ -154,12 +192,13 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
     };
   }, []);
 
-  // 檢查是否為 iPhone Safari
-  const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+  // 檢查是否為 iOS 且無安全來源
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSecureContext = window.isSecureContext;
   const hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
-      // 如果是 iPhone Safari 且不支援攝像頭，顯示特殊訊息
-      if (isIOSSafari && !hasGetUserMedia) {
+      // 如果是 iOS 且無安全來源，顯示特殊訊息
+      if (isIOS && !isSecureContext) {
         return (
           <div style={{ 
             backgroundColor: 'white', 
@@ -179,7 +218,11 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
               marginBottom: '20px'
             }}>
               <p style={{ color: '#856404', margin: 0 }}>
-                <strong>iPhone Safari 不支援攝像頭 API</strong><br/>
+                <strong>iOS 安全限制：需要 HTTPS 或 localhost</strong><br/>
+                iOS 上所有瀏覽器（Safari/Chrome/Edge）都使用 WebKit，同一套安全限制。
+                <br />
+                相機功能只能在 HTTPS 或 localhost 環境使用。
+                <br />
                 但我們提供了完整的替代解決方案！
               </p>
             </div>
@@ -207,9 +250,79 @@ const CameraInspection: React.FC<CameraInspectionProps> = ({
               marginBottom: '20px'
             }}>
               <h4 style={{ color: '#155724', margin: '0 0 10px 0' }}>🚀 立即開始：</h4>
-              <p style={{ color: '#155724', margin: 0 }}>
-                點擊 "📱 iPhone" 標籤開始使用完整的 iPhone 房屋檢查工作流程
+              <p style={{ color: '#155724', margin: 0, marginBottom: '10px' }}>
+                點擊 <strong>「📱 iPhone」</strong> 標籤開始使用完整的 iPhone 房屋檢查工作流程
               </p>
+            </div>
+            
+            {/* 實時流指引 */}
+            <div style={{
+              backgroundColor: '#e3f2fd',
+              border: '2px solid #2196F3',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '20px',
+              textAlign: 'center'
+            }}>
+              <h4 style={{ color: '#1565C0', margin: '0 0 15px 0', fontSize: '18px' }}>
+                📹 想要實時流檢測？
+              </h4>
+              <p style={{ color: '#1565C0', marginBottom: '15px' }}>
+                iPhone Safari <strong>不支援</strong>實時流媒體，但您可以使用以下方法：
+              </p>
+              
+              <div style={{
+                background: 'white',
+                padding: '15px',
+                borderRadius: '6px',
+                marginBottom: '15px',
+                textAlign: 'left'
+              }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>方法 1：使用 HTTPS 或 localhost（推薦）</strong>
+                </div>
+                <ul style={{ paddingLeft: '20px', margin: 0, color: '#333' }}>
+                  <li><strong>HTTPS 部署</strong>：使用 HTTPS 網址訪問（生產環境）</li>
+                  <li><strong>localhost 開發</strong>：使用 http://localhost:3000 訪問</li>
+                  <li>注意：http://192.168.x.x:3000 不支援</li>
+                </ul>
+              </div>
+              
+              <div style={{
+                background: 'white',
+                padding: '15px',
+                borderRadius: '6px',
+                marginBottom: '15px',
+                textAlign: 'left'
+              }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>方法 2：使用拍照上傳（不受 HTTPS 限制）</strong>
+                </div>
+                <p style={{ margin: 0, color: '#333' }}>
+                  點擊 <strong>「📱 iPhone」</strong> 標籤，使用原生相機拍照後上傳分析
+                </p>
+              </div>
+              
+              <button
+                onClick={() => {
+                  // 觸發切換到實時檢測標籤的事件
+                  const event = new CustomEvent('switchTab', { detail: 'iphone-realtime' });
+                  window.dispatchEvent(event);
+                }}
+                style={{
+                  background: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '6px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                📹 查看實時檢測功能
+              </button>
             </div>
           </div>
         );
