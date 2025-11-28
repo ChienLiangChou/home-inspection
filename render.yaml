@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: home-inspection-backend
+    runtime: python
+    plan: free
+    rootDir: apps/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # 需要在 Dashboard 手動設置
+      - key: OPENAI_VISION_MODEL
+        value: gpt-4o-mini
+      - key: REALTIME_MODEL
+        value: gpt-4
+      - key: DEBUG
+        value: "false"
+      - key: PORT
+        value: "10000"  # Render 會自動覆蓋，但提供默認值
+
