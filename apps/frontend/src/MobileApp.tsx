@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import CameraInspection from './components/CameraInspection';
 import SimpleBluetoothManager from './components/SimpleBluetoothManager';
 import RealtimeCameraStream from './components/RealtimeCameraStream';
 import DirectCameraAccess from './components/DirectCameraAccess';
 import SimpleCameraTest from './components/SimpleCameraTest';
 import UniversalCameraAccess from './components/UniversalCameraAccess';
-import iPhoneCameraSolution from './components/iPhoneCameraSolution';
-import iPhoneRealtimeStream from './components/iPhoneRealtimeStream';
+// Components imported but used below
+import iPhoneCameraSolutionComponent from './components/iPhoneCameraSolution';
+import iPhoneRealtimeStreamComponent from './components/iPhoneRealtimeStream';
 
 interface SensorReading {
   id: number;
@@ -428,18 +429,18 @@ export default function MobileApp() {
 
         {activeTab === 'iphone-workflow' && (
           <div>
-            <iPhoneCameraSolution />
+            {React.createElement(iPhoneCameraSolutionComponent)}
           </div>
         )}
 
         {activeTab === 'iphone-realtime' && (
           <div>
-            <iPhoneRealtimeStream 
-              onIssueDetected={(issue) => {
+            {React.createElement(iPhoneRealtimeStreamComponent, {
+              onIssueDetected: (issue: { id: string; timestamp: string; type: string; severity: 'low' | 'medium' | 'high'; description: string; recommendation: string; location?: string; image?: string }) => {
                 console.log('Issue detected:', issue);
                 // You can add additional handling here, like saving to backend
-              }}
-            />
+              }
+            })}
           </div>
         )}
       </div>

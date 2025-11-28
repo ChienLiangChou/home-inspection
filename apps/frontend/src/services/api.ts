@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { SensorData, ReadingFilter, SensorReadingResponse } from '../types/sensor';
+import type { ReadingFilter, SensorReadingResponse } from '../types/sensor';
 
 const API_BASE_URL = '/api';
 

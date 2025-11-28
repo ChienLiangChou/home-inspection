@@ -616,7 +616,7 @@ const RealtimeCameraStream: React.FC<RealtimeCameraStreamProps> = ({
   // 檢查是否為 iOS 且無安全來源
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isSecureContext = window.isSecureContext;
-  const hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  // const hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
       // 如果是 iOS 且無安全來源，顯示特殊訊息
       if (isIOS && !isSecureContext) {

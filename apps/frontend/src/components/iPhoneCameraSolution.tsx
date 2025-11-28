@@ -62,7 +62,7 @@ const iPhoneCameraSolution: React.FC = () => {
       
       // Aggregate results
       const aggregatedAnalysis: any = {};
-      let totalScore = 0;
+      // let totalScore = 0;
       const allRecommendations: string[] = [];
       const allIssues: any[] = [];
 
@@ -440,3 +440,4 @@ const iPhoneCameraSolution: React.FC = () => {
 };
 
 export default iPhoneCameraSolution;
+export { iPhoneCameraSolution };

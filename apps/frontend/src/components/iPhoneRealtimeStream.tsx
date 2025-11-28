@@ -25,17 +25,17 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
   const [detectedIssues, setDetectedIssues] = useState<DetectedIssue[]>([]);
   const [currentAnalysis, setCurrentAnalysis] = useState<string>('');
   const [analysisResults, setAnalysisResults] = useState<any[]>([]);
-  const [streamQuality, setStreamQuality] = useState<'low' | 'medium' | 'high'>('medium');
+  const [streamQuality, _setStreamQuality] = useState<'low' | 'medium' | 'high'>('medium');
   const [inspectionStartTime, setInspectionStartTime] = useState<Date | null>(null);
   const [reportLink, setReportLink] = useState<string | null>(null);
-  const [reportId, setReportId] = useState<string | null>(null);
+  const [_reportId, setReportId] = useState<string | null>(null);
   const [reportContent, setReportContent] = useState<any>(null);
   const [showReport, setShowReport] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [pendingIssue, setPendingIssue] = useState<DetectedIssue | null>(null);
   const [showSolutionPrompt, setShowSolutionPrompt] = useState(false);
   const [showIssuePrompt, setShowIssuePrompt] = useState(false);
-  const [photoAnalysisResult, setPhotoAnalysisResult] = useState<any>(null);
+  const [_photoAnalysisResult, setPhotoAnalysisResult] = useState<any>(null);
   const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
   const [continuousPhotoMode, setContinuousPhotoMode] = useState(false);
   const [analysisIndicator, setAnalysisIndicator] = useState<string>('');
@@ -848,8 +848,8 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
   // Check browser compatibility on mount
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isSecureContext = window.isSecureContext;
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const isHTTPS = window.location.protocol === 'https:';
+  // const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  // const isHTTPS = window.location.protocol === 'https:';
   
   // iOS requires secure context - all iOS browsers (Safari/Chrome/Edge) use WebKit with same restrictions
   const isIOSWithoutSecureContext = isIOS && !isSecureContext;
@@ -2064,4 +2064,5 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
 };
 
 export default iPhoneRealtimeStream;
+export { iPhoneRealtimeStream };
 
