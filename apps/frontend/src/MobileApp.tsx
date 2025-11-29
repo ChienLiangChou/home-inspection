@@ -34,7 +34,12 @@ export default function MobileApp() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/sensor/latest?limit=10');
+      
+      // Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+      const apiUrl = `${apiBaseUrl}/sensor/latest?limit=10`;
+      
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -92,7 +97,11 @@ export default function MobileApp() {
         }]
       };
 
-      const response = await fetch('/api/sensor/data', {
+      // Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+      const apiUrl = `${apiBaseUrl}/sensor/data`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
