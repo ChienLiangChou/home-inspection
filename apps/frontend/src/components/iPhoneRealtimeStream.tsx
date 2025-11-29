@@ -54,6 +54,7 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
   const frameCaptureIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const issueIdCounter = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const isAnalyzingRef = useRef(false); // Use ref to track analyzing state in intervals
 
   // Start real-time stream using iPhone camera
   const startRealtimeStream = async () => {
@@ -364,9 +365,8 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
           if (isStreaming && videoRef.current) {
             // Check if video has valid dimensions
             if (videoRef.current.videoWidth > 0 && videoRef.current.videoHeight > 0) {
-              // Safety check: if isAnalyzing is stuck for too long (> 60 seconds), reset it
-              // This prevents analysis from being blocked indefinitely
-              if (isAnalyzing) {
+              // Safety check: use ref to get current analyzing state (not closure value)
+              if (isAnalyzingRef.current) {
                 console.warn('⚠️ Analysis still in progress, skipping this frame...');
                 return;
               }
@@ -395,11 +395,12 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
 
   // Perform real-time analysis on captured frame
   const performRealtimeAnalysis = async (frameData: string) => {
-    if (isAnalyzing) {
+    if (isAnalyzingRef.current) {
       console.log('Already analyzing, skipping...');
       return; // Skip if already analyzing
     }
 
+    isAnalyzingRef.current = true;
     setIsAnalyzing(true);
     // Don't increment analysisCount here - only increment when analysis succeeds
     setCurrentAnalysis('🔍 正在分析畫面...');
@@ -475,6 +476,7 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
       // Don't increment analysisCount on error
       // Ensure isAnalyzing is reset even on error
     } finally {
+      isAnalyzingRef.current = false;
       setIsAnalyzing(false);
       // Clear indicator after a delay
       setTimeout(() => setAnalysisIndicator(''), 2000);
