@@ -9,8 +9,8 @@ alembic==1.12.1
 psycopg2-binary==2.9.9
 
 # Pydantic for data validation
-pydantic==2.5.0
-pydantic-settings==2.1.0
+pydantic>=2.10.0  # Upgraded: Use newer version with pre-compiled wheels to avoid Rust compilation on Render
+pydantic-settings>=2.6.0  # Upgraded to match pydantic version
 
 # Environment and configuration
 python-dotenv==1.0.0
