@@ -416,6 +416,9 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
       const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
       const apiUrl = `${apiBaseUrl}/rag/analyze-realtime-stream`;
       
+      console.log(`🌐 API URL: ${apiUrl}`);
+      console.log(`📊 Frame data size: ${base64Data.length} bytes`);
+      
       // Send frame to backend for analysis with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
@@ -456,8 +459,9 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
         processAnalysisResults(analysis, frameData);
       } else {
         const errorText = await response.text();
-        console.error('❌ Analysis failed:', response.status, errorText);
-        setCurrentAnalysis(`⚠️ 分析暫時失敗 (${response.status})，將繼續嘗試...`);
+        console.error(`❌ Analysis failed: ${response.status} ${response.statusText}`, errorText);
+        console.error(`📋 Response URL: ${response.url}`);
+        setCurrentAnalysis(`⚠️ 分析暫時失敗 (${response.status}): ${errorText.substring(0, 50)}`);
         setAnalysisIndicator('');
         // Don't increment analysisCount on failure
       }
