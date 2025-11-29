@@ -7,6 +7,8 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.6"  # Use Python 3.11 to avoid SQLAlchemy compatibility issues with Python 3.13
       - key: OPENAI_API_KEY
         sync: false  # 需要在 Dashboard 手動設置
       - key: OPENAI_VISION_MODEL
