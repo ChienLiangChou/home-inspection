@@ -41,6 +41,8 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
   const [analysisIndicator, setAnalysisIndicator] = useState<string>('');
   const [photoCountdown, setPhotoCountdown] = useState<number | null>(null);
   const [capturedPhotos, setCapturedPhotos] = useState<File[]>([]);
+  const [analysisCount, setAnalysisCount] = useState(0); // Track number of analyses performed
+  const [frameCount, setFrameCount] = useState(0); // Track number of frames captured
   const continuousPhotoIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -323,6 +325,11 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
 
     setIsStreaming(false);
     setIsAnalyzing(false);
+    setCurrentAnalysis('');
+    setAnalysisIndicator('');
+    
+    // Reset counters when starting new stream, not when stopping
+    // (Keep them for statistics display)
     
     // Auto-generate report when stopping inspection
     if (inspectionStartTime && detectedIssues.length > 0) {
@@ -359,7 +366,8 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
             if (videoRef.current.videoWidth > 0 && videoRef.current.videoHeight > 0) {
               const frameData = captureFrame();
               if (frameData) {
-                console.log('Frame captured, starting analysis...');
+                setFrameCount(prev => prev + 1);
+                console.log(`📸 Frame #${frameCount + 1} captured, starting analysis...`);
                 performRealtimeAnalysis(frameData);
               } else {
                 console.warn('Failed to capture frame');
@@ -386,8 +394,10 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
     }
 
     setIsAnalyzing(true);
-    setCurrentAnalysis('🔍 正在分析畫面...');
-    console.log('Starting real-time analysis...');
+    setAnalysisCount(prev => prev + 1);
+    setCurrentAnalysis(`🔍 正在分析畫面... (第 ${analysisCount + 1} 次分析)`);
+    setAnalysisIndicator(`🤖 AI 正在分析畫面 (第 ${analysisCount + 1} 次)...`);
+    console.log(`🔍 Starting real-time analysis #${analysisCount + 1}...`, new Date().toLocaleTimeString());
 
     try {
       // Extract base64 data (remove data URL prefix if present)
@@ -416,7 +426,7 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
 
       if (response.ok) {
         const analysis = await response.json();
-        console.log('Analysis result:', analysis);
+        console.log(`✅ Analysis #${analysisCount + 1} completed:`, analysis);
         
         // Store analysis result for display
         setAnalysisResults(prev => [{
@@ -1129,6 +1139,11 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
           <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '5px' }}>
             狀態: {isLoading ? '⏳ 啟動中...' : isStreaming ? '🟢 實時檢測中' : '⚪ 未啟動'}
           </div>
+          {isStreaming && (
+            <div style={{ fontSize: '12px', color: '#6c757d', marginBottom: '5px' }}>
+              已捕獲: {frameCount} 幀 | 已分析: {analysisCount} 次 | 檢測到問題: {detectedIssues.length} 個
+            </div>
+          )}
           <div style={{ fontSize: '12px', color: '#6c757d', marginBottom: '5px' }}>
             {error ? `❌ ${error}` : currentAnalysis || '等待啟動...'}
           </div>
@@ -1611,21 +1626,64 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
           </div>
         )}
 
-        {isAnalyzing && (
+        {/* AI Analysis Indicator - More Visible */}
+        {isStreaming && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            background: 'rgba(220, 53, 69, 0.95)',
+            color: 'white',
+            padding: '10px 15px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            zIndex: 10,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+          }}>
+            <span style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              background: 'white',
+              animation: 'pulse 1s infinite'
+            }}></span>
+            LIVE 實時流
+          </div>
+        )}
+        {isAnalyzing && isStreaming && (
           <div style={{
             position: 'absolute',
             top: '10px',
             right: '10px',
-            background: 'rgba(0, 123, 255, 0.9)',
+            background: 'rgba(33, 150, 243, 0.95)',
             color: 'white',
             padding: '12px 18px',
             borderRadius: '8px',
             fontSize: '16px',
             fontWeight: 'bold',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+            boxShadow: '0 4px 12px rgba(33, 150, 243, 0.5)',
             zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            animation: 'pulse 1.5s ease-in-out infinite',
+            border: '2px solid rgba(255, 255, 255, 0.3)'
           }}>
-            🔍 正在分析畫面...
+            <div style={{
+              width: '16px',
+              height: '16px',
+              borderRadius: '50%',
+              background: 'white',
+              animation: 'spin 1s linear infinite',
+              border: '2px solid rgba(33, 150, 243, 0.5)',
+              borderTopColor: 'white'
+            }}></div>
+            <span>🤖 AI 正在分析畫面...</span>
           </div>
         )}
         {isStreaming && !isAnalyzing && (
@@ -1638,9 +1696,20 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
             padding: '8px 15px',
             borderRadius: '6px',
             fontSize: '14px',
-            zIndex: 10
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ✅ 監控中
+            <span style={{
+              display: 'inline-block',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'white',
+              animation: 'pulse 2s infinite'
+            }}></span>
+            等待分析...
           </div>
         )}
       </div>
