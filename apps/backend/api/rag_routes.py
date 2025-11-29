@@ -376,11 +376,26 @@ def analyze_image_with_openai(frame_base64: str, db: Session = None) -> Dict[str
                 json_match = re.search(r'\{.*\}', content, re.DOTALL)
                 if json_match:
                     analysis_data = json.loads(json_match.group())
-                    return analysis_data
+                    # Validate that we have detected_issues
+                    if "detected_issues" in analysis_data:
+                        issues_count = len(analysis_data.get("detected_issues", []))
+                        print(f"✅ Successfully parsed JSON with {issues_count} issue(s)")
+                        if issues_count == 0:
+                            print(f"⚠️  Warning: JSON parsed but detected_issues is empty")
+                        return analysis_data
+                    else:
+                        print(f"⚠️  JSON parsed but no detected_issues field found, attempting text extraction")
+                        # Fall through to text extraction
                 else:
                     # Fallback: parse as plain JSON
                     analysis_data = json.loads(content)
-                    return analysis_data
+                    if "detected_issues" in analysis_data:
+                        issues_count = len(analysis_data.get("detected_issues", []))
+                        print(f"✅ Successfully parsed plain JSON with {issues_count} issue(s)")
+                        return analysis_data
+                    else:
+                        print(f"⚠️  Plain JSON parsed but no detected_issues field found, attempting text extraction")
+                        # Fall through to text extraction
             except json.JSONDecodeError as e:
                 # If not JSON, try to extract issues from text
                 print(f"⚠️  JSON parsing failed, attempting text extraction: {e}")
@@ -390,8 +405,8 @@ def analyze_image_with_openai(frame_base64: str, db: Session = None) -> Dict[str
                 detected_issues = []
                 if content:
                     # Look for leak-related keywords in Chinese and English
-                    leak_keywords = ['漏水', '水漬', '水痕', '水印', '變色', '潮濕', 'leak', 'water', 'stain', 'moisture']
-                    issue_keywords = ['問題', 'issue', 'problem', 'damage', '損壞']
+                    leak_keywords = ['漏水', '水漬', '水痕', '水印', '變色', '潮濕', 'leak', 'water', 'stain', 'moisture', '滲漏', '濕潤', '水跡', 'water stain', 'water damage']
+                    issue_keywords = ['問題', 'issue', 'problem', 'damage', '損壞', '裂縫', 'crack']
                     
                     content_lower = content.lower()
                     has_leak_indicators = any(keyword.lower() in content_lower for keyword in leak_keywords)
