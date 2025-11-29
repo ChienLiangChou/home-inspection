@@ -361,13 +361,20 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
       if (videoRef.current && videoRef.current.readyState >= 2) {
         // Video is ready, start capturing
         frameCaptureIntervalRef.current = setInterval(() => {
-          if (isStreaming && !isAnalyzing && videoRef.current) {
+          if (isStreaming && videoRef.current) {
             // Check if video has valid dimensions
             if (videoRef.current.videoWidth > 0 && videoRef.current.videoHeight > 0) {
+              // Safety check: if isAnalyzing is stuck for too long (> 60 seconds), reset it
+              // This prevents analysis from being blocked indefinitely
+              if (isAnalyzing) {
+                console.warn('⚠️ Analysis still in progress, skipping this frame...');
+                return;
+              }
+              
               const frameData = captureFrame();
               if (frameData) {
                 setFrameCount(prev => prev + 1);
-                console.log(`📸 Frame #${frameCount + 1} captured, starting analysis...`);
+                console.log(`📸 Frame captured, starting analysis...`);
                 performRealtimeAnalysis(frameData);
               } else {
                 console.warn('Failed to capture frame');
@@ -394,10 +401,10 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
     }
 
     setIsAnalyzing(true);
-    setAnalysisCount(prev => prev + 1);
-    setCurrentAnalysis(`🔍 正在分析畫面... (第 ${analysisCount + 1} 次分析)`);
-    setAnalysisIndicator(`🤖 AI 正在分析畫面 (第 ${analysisCount + 1} 次)...`);
-    console.log(`🔍 Starting real-time analysis #${analysisCount + 1}...`, new Date().toLocaleTimeString());
+    // Don't increment analysisCount here - only increment when analysis succeeds
+    setCurrentAnalysis('🔍 正在分析畫面...');
+    setAnalysisIndicator('🤖 AI 正在分析畫面...');
+    console.log(`🔍 Starting real-time analysis...`, new Date().toLocaleTimeString());
 
     try {
       // Extract base64 data (remove data URL prefix if present)
@@ -409,7 +416,10 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
       const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
       const apiUrl = `${apiBaseUrl}/rag/analyze-realtime-stream`;
       
-      // Send frame to backend for analysis
+      // Send frame to backend for analysis with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -421,12 +431,20 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
           location: 'current_inspection_site',
           timestamp: new Date().toISOString(),
           quality: streamQuality
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const analysis = await response.json();
-        console.log(`✅ Analysis #${analysisCount + 1} completed:`, analysis);
+        // Increment analysis count only when analysis succeeds
+        setAnalysisCount(prev => {
+          const newCount = prev + 1;
+          console.log(`✅ Analysis #${newCount} completed:`, analysis);
+          return newCount;
+        });
         
         // Store analysis result for display
         setAnalysisResults(prev => [{
@@ -438,14 +456,20 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
         processAnalysisResults(analysis, frameData);
       } else {
         const errorText = await response.text();
-        console.error('Analysis failed:', response.status, errorText);
-        setCurrentAnalysis(`⚠️ 分析暫時失敗，將繼續嘗試...`);
+        console.error('❌ Analysis failed:', response.status, errorText);
+        setCurrentAnalysis(`⚠️ 分析暫時失敗 (${response.status})，將繼續嘗試...`);
         setAnalysisIndicator('');
+        // Don't increment analysisCount on failure
       }
     } catch (err: any) {
-      console.error('Analysis error:', err);
-      setCurrentAnalysis('❌ 分析失敗: ' + (err.message || '網路錯誤'));
+      const errorMessage = err.name === 'AbortError' 
+        ? '分析超時（超過 30 秒）' 
+        : (err.message || '網路錯誤');
+      console.error('❌ Analysis error:', err);
+      setCurrentAnalysis('❌ 分析失敗: ' + errorMessage);
       setAnalysisIndicator('');
+      // Don't increment analysisCount on error
+      // Ensure isAnalyzing is reset even on error
     } finally {
       setIsAnalyzing(false);
       // Clear indicator after a delay
