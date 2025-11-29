@@ -830,23 +830,81 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
         const analysis = await response.json();
         console.log('Continuous photo analysis:', analysis);
         
-        // Process detected issues
-        if (analysis.frameAnalysis && analysis.frameAnalysis.detected_issues) {
-          analysis.frameAnalysis.detected_issues.forEach((issue: any) => {
+        // Process detected issues - check both issues and detected_issues
+        const frameAnalysis = analysis.frameAnalysis || {};
+        const issues = frameAnalysis.issues || frameAnalysis.detected_issues || [];
+        const recommendations = analysis.ragContext?.recommendations || frameAnalysis.recommendations || [];
+        
+        if (issues.length > 0) {
+          // Process each detected issue
+          for (const issue of issues) {
             const newIssue: DetectedIssue = {
               id: `continuous_${Date.now()}_${Math.random()}`,
               timestamp: new Date().toISOString(),
-              type: issue.type || 'unknown',
+              type: issue.type || '未知問題',
               severity: issue.severity || 'medium',
-              description: issue.description || '',
-              recommendation: issue.recommendation || '',
+              description: issue.description || '檢測到潛在問題',
+              recommendation: issue.recommendation || recommendations[0] || '建議進行專業檢查',
               location: 'continuous_photo',
               image: `data:image/jpeg;base64,${base64}`
             };
-            setDetectedIssues(prev => [newIssue, ...prev]);
-            onIssueDetected?.(newIssue);
-          });
+            
+            // Check if similar issue already exists (avoid duplicates)
+            setDetectedIssues(prev => {
+              const exists = prev.some(existing => 
+                existing.type === newIssue.type && 
+                existing.description === newIssue.description &&
+                Date.now() - new Date(existing.timestamp).getTime() < 10000 // Within 10 seconds
+              );
+              
+              if (!exists) {
+                // Show prompt to user asking if they want solution now or later
+                setPendingIssue(newIssue);
+                setShowIssuePrompt(true);
+                
+                // Save to backend (async, don't wait)
+                const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+                const issuesUrl = `${apiBaseUrl}/issues`;
+                
+                fetch(issuesUrl, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    issue_type: newIssue.type,
+                    severity: newIssue.severity,
+                    description: newIssue.description,
+                    recommendation: newIssue.recommendation,
+                    location: newIssue.location,
+                    component: 'continuous_photo',
+                    image_data: newIssue.image?.split(',')[1], // Remove data URL prefix
+                    metadata_json: {
+                      detection_method: 'continuous_photo',
+                      stream_quality: streamQuality
+                    }
+                  })
+                }).catch(err => {
+                  console.error('Failed to save issue to backend:', err);
+                });
+
+                // Notify user immediately
+                notifyIssueDetected(newIssue, true);
+                onIssueDetected?.(newIssue);
+                
+                return [newIssue, ...prev];
+              }
+              return prev;
+            });
+          }
+        } else {
+          // No issues detected
+          console.log('✅ 照片分析完成：未檢測到問題');
         }
+      } else {
+        const errorText = await response.text();
+        console.error('Continuous photo analysis failed:', response.status, errorText);
+        alert(`⚠️ 照片分析失敗: ${response.status} ${errorText}`);
       }
     } catch (err: any) {
       console.error('Continuous photo analysis error:', err);
