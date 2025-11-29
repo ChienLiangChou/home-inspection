@@ -43,7 +43,7 @@ flake8==6.1.0
 mypy==1.7.1
 
 # Development tools
-watchfiles==0.21.0
+# watchfiles==0.21.0  # Removed - causes build failure on Render (Rust compilation issue)
 
 # Self-learning system dependencies
 scikit-learn>=1.3.0  # Machine learning models (severity prediction)
