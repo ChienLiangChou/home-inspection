@@ -252,7 +252,11 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
 
     setIsGeneratingReport(true);
     try {
-      const response = await fetch('/api/reports/generate', {
+      // Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+      const reportsUrl = `${apiBaseUrl}/reports/generate`;
+      
+      const response = await fetch(reportsUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +279,8 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
       
       // Fetch report content for display
       try {
-        const reportResponse = await fetch(`/api/reports/${result.reportId}`);
+        const reportDetailUrl = `${apiBaseUrl}/reports/${result.reportId}`;
+        const reportResponse = await fetch(reportDetailUrl);
         if (reportResponse.ok) {
           const reportData = await reportResponse.json();
           setReportContent(reportData);
@@ -390,8 +395,12 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
         ? frameData.split(',')[1] 
         : frameData;
 
+      // Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+      const apiUrl = `${apiBaseUrl}/rag/analyze-realtime-stream`;
+      
       // Send frame to backend for analysis
-      const response = await fetch('/api/rag/analyze-realtime-stream', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -469,7 +478,10 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
             setShowIssuePrompt(true);
             
             // Save to backend (async, don't wait)
-            fetch('/api/issues', {
+            const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+            const issuesUrl = `${apiBaseUrl}/issues`;
+            
+            fetch(issuesUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -642,8 +654,12 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
         ? photoData.split(',')[1] 
         : photoData;
 
+      // Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+      const analyzeUrl = `${apiBaseUrl}/rag/analyze-realtime-stream`;
+      
       // Use the same endpoint but mark it as photo analysis
-      const response = await fetch('/api/rag/analyze-realtime-stream', {
+      const response = await fetch(analyzeUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -677,7 +693,10 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
             };
 
             // Save to backend
-            fetch('/api/issues', {
+            const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+            const issuesUrl = `${apiBaseUrl}/issues`;
+            
+            fetch(issuesUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -792,8 +811,12 @@ const iPhoneRealtimeStream: React.FC<iPhoneRealtimeStreamProps> = ({
         reader.readAsDataURL(photo);
       });
 
+      // Use VITE_API_URL if set (production), otherwise use relative path (development with proxy)
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+      const analyzeUrl = `${apiBaseUrl}/rag/analyze-realtime-stream`;
+      
       // Analyze using real-time stream API
-      const response = await fetch('/api/rag/analyze-realtime-stream', {
+      const response = await fetch(analyzeUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

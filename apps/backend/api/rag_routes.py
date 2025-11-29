@@ -286,20 +286,50 @@ def analyze_image_with_openai(frame_base64: str, db: Session = None) -> Dict[str
         
         # Use optimized prompt or fallback to default
         if not prompt_template:
-            prompt_template = """請分析這張房屋檢查照片，檢測以下問題：
-1. 結構問題（裂縫、損壞、變形）
-2. 濕度問題（水漬、黴菌、潮濕跡象）
-3. 管道問題（洩漏、腐蝕、堵塞跡象）
-4. 電氣問題（電線暴露、面板問題）
-5. 屋頂問題（損壞、缺失、老化）
-6. 其他安全隱患
+            prompt_template = """請仔細分析這張房屋檢查照片，特別注意檢測以下問題：
+
+1. 漏水問題（最高優先級）：
+   - 水漬、水痕、水印
+   - 牆壁或天花板的變色（黃色、棕色）
+   - 積水、滴水、滲漏跡象
+   - 管道周圍的濕潤或腐蝕
+   - 地面上的水跡
+   
+2. 結構問題：
+   - 裂縫、損壞、變形
+   - 牆壁不平整
+   
+3. 濕度問題：
+   - 黴菌、發霉跡象
+   - 潮濕、霉味跡象
+   
+4. 管道問題：
+   - 洩漏、腐蝕、堵塞跡象
+   - 管道連接處的問題
+   
+5. 電氣問題：
+   - 電線暴露、面板問題
+   
+6. 屋頂問題：
+   - 損壞、缺失、老化
+   
+7. 其他安全隱患
+
+**重要提示**：
+- 即使問題看起來很小，也應該檢測出來
+- 對於明顯的問題（如漏水、水漬），severity 應該設為 "high"
+- 如果看到任何水跡、變色或潮濕跡象，必須標記為漏水問題
 
 請以 JSON 格式返回，包含：
-- detected_issues: 檢測到的問題列表，每個問題包含 type, severity (high/medium/low), description, recommendation
+- detected_issues: 檢測到的問題列表，每個問題必須包含：
+  * type: 問題類型（如 "漏水"、"結構問題"等）
+  * severity: "high"（嚴重，需要立即處理）、"medium"（中等）、"low"（輕微）
+  * description: 詳細描述問題的位置和狀況
+  * recommendation: 具體的解決建議
 - overall_assessment: 整體評估
 - confidence: 分析信心度 (0-1)
 
-如果沒有檢測到問題，返回空列表。"""
+如果沒有檢測到任何問題，返回空列表 []。如果檢測到問題，必須在 detected_issues 中包含詳細信息。"""
         
         # Use OpenAI Vision API to analyze the image
         response = requests.post(
