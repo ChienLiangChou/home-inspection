@@ -317,8 +317,10 @@ def analyze_image_with_openai(frame_base64: str, db: Session = None) -> Dict[str
 
 **重要提示**：
 - 即使問題看起來很小，也應該檢測出來
-- 對於明顯的問題（如漏水、水漬），severity 應該設為 "high"
+- 對於明顯的問題（如漏水、水漬），severity 必須設為 "high"
 - 如果看到任何水跡、變色或潮濕跡象，必須標記為漏水問題
+- 特別注意牆角、牆壁連接處、天花板邊緣等容易漏水的區域
+- 如果照片中有兩處或更多地方出現漏水跡象，必須為每一處單獨創建一個問題條目
 
 請以 JSON 格式返回，包含：
 - detected_issues: 檢測到的問題列表，每個問題必須包含：
@@ -357,9 +359,10 @@ def analyze_image_with_openai(frame_base64: str, db: Session = None) -> Dict[str
                         ]
                     }
                 ],
-                "max_tokens": 1000
+                "max_tokens": 2000,  # Increased to ensure complete analysis for multiple issues
+                "temperature": 0.3  # Lower temperature for more focused detection
             },
-            timeout=30
+            timeout=60  # Increased timeout for better reliability
         )
 
         if response.status_code == 200:
@@ -378,12 +381,35 @@ def analyze_image_with_openai(frame_base64: str, db: Session = None) -> Dict[str
                     # Fallback: parse as plain JSON
                     analysis_data = json.loads(content)
                     return analysis_data
-            except json.JSONDecodeError:
-                # If not JSON, create structured response from text
+            except json.JSONDecodeError as e:
+                # If not JSON, try to extract issues from text
+                print(f"⚠️  JSON parsing failed, attempting text extraction: {e}")
+                print(f"📄 Content preview: {content[:500]}...")
+                
+                # Try to extract issues from text description
+                detected_issues = []
+                if content:
+                    # Look for leak-related keywords in Chinese and English
+                    leak_keywords = ['漏水', '水漬', '水痕', '水印', '變色', '潮濕', 'leak', 'water', 'stain', 'moisture']
+                    issue_keywords = ['問題', 'issue', 'problem', 'damage', '損壞']
+                    
+                    content_lower = content.lower()
+                    has_leak_indicators = any(keyword.lower() in content_lower for keyword in leak_keywords)
+                    
+                    if has_leak_indicators or any(keyword in content for keyword in issue_keywords):
+                        # Create issue from text analysis
+                        detected_issues.append({
+                            "type": "漏水問題" if has_leak_indicators else "潛在問題",
+                            "severity": "high" if has_leak_indicators else "medium",
+                            "description": content[:500] if len(content) > 500 else content,
+                            "recommendation": "建議立即檢查並修復漏水問題。請聯繫專業水電工進行詳細檢查。" if has_leak_indicators else "建議進行專業檢查以確定問題的嚴重程度。"
+                        })
+                        print(f"✅ Extracted issue from text: {detected_issues[0]['type']}")
+                
                 return {
-                    "detected_issues": [],
+                    "detected_issues": detected_issues,
                     "overall_assessment": content,
-                    "confidence": 0.7
+                    "confidence": 0.6  # Lower confidence for text-based extraction
                 }
         else:
             print(f"OpenAI API error: {response.status_code} - {response.text}")
